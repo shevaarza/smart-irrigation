@@ -63,10 +63,9 @@ export function useSensorData(limit = 20) {
   }, [limit])
 
   // Hapus dari state lokal setelah delete dari database berhasil
-  const removeById = (id: number) => {
-    setData((prev) => prev.filter((row) => row.id !== id))
-  }
-
+const removeById = (id: string | number) => {
+  setData((prev) => prev.filter((row) => String(row.id) !== String(id)))
+}
   return {
     data,
     latest: data[0] ?? null,
