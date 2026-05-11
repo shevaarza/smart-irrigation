@@ -272,7 +272,7 @@ export default function WeatherPage() {
             </div>
           </div>
 
-         {weather?.hourly && (
+{weather?.hourly && (
   <div className="bg-white border border-slate-100 rounded-2xl p-5">
     <h3 className="text-lg font-bold text-slate-700 mb-5">
       Prediksi Beberapa Jam Kedepan
@@ -282,11 +282,16 @@ export default function WeatherPage() {
       {weather.hourly
         .filter((item) => {
           const now = new Date()
-          const itemTime = new Date(item.time)
 
-          return itemTime >= now
+          const nextHour = now.getMinutes() > 0
+            ? now.getHours() + 1
+            : now.getHours()
+
+          const itemHour = Number(item.time.slice(11, 13))
+
+          return itemHour >= nextHour
         })
-        .slice(0, 8)
+        .slice(0, 12)
         .map((item, index) => (
           <div
             key={index}
