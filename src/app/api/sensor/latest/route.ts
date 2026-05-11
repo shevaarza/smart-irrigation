@@ -16,10 +16,7 @@ export async function GET() {
 
   if (error) {
     return NextResponse.json(
-      {
-        success: false,
-        error: error.message,
-      },
+      { success: false, error: error.message },
       { status: 500 }
     )
   }
@@ -35,19 +32,15 @@ export async function GET() {
 
   const lastUpdate = new Date(data.recorded_at)
   const now = new Date()
+  const diffSeconds = (now.getTime() - lastUpdate.getTime()) / 1000
 
-  const diffMs = now.getTime() - lastUpdate.getTime()
-  const diffSeconds = diffMs / 1000
-
-  const online = diffSeconds <= 60
+  const online = diffSeconds <= 120
 
   return NextResponse.json({
     success: true,
     online,
     last_update: data.recorded_at,
-    data: online ? data : null,
-    message: online
-      ? 'ESP32 online'
-      : 'ESP32 offline',
+    data,
+    message: online ? 'ESP32 online' : 'ESP32 offline',
   })
 }
