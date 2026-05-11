@@ -72,39 +72,53 @@ export function WeatherCard({ weather }: WeatherCardProps) {
           </p>
         </div>
       </div>
-
-        {weather.hourly && (
+{weather.hourly && (
   <div className="mt-5">
     <p className="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-3">
       Prediksi Beberapa Jam Ke Depan
     </p>
 
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {weather.hourly.slice(1, 5).map((hour: any) => (
-        <div
-          key={hour.time}
-          className="bg-white rounded-xl p-3 text-center border border-blue-50"
-        >
-          <p className="text-xs text-slate-400">
-            {new Date(hour.time).toLocaleTimeString('id-ID', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </p>
+      {weather.hourly
+        .filter((hour: any) => {
+          const now = new Date()
 
-          <p className="text-xl mt-1">
-            {getWeatherEmoji(hour.weather_condition)}
-          </p>
+          const nextHour =
+            now.getMinutes() > 0
+              ? now.getHours() + 1
+              : now.getHours()
 
-          <p className="text-sm font-bold text-blue-700 mt-1">
-            {Math.round(hour.temperature)}°C
-          </p>
+          const hourTime = new Date(hour.time)
+          const itemHour = hourTime.getHours()
 
-          <p className="text-[11px] text-slate-400">
-            Hujan {hour.rain_probability ?? 0}%
-          </p>
-        </div>
-      ))}
+          return itemHour >= nextHour
+        })
+        .slice(0, 4)
+        .map((hour: any) => (
+          <div
+            key={hour.time}
+            className="bg-white rounded-xl p-3 text-center border border-blue-50"
+          >
+            <p className="text-xs text-slate-400">
+              {new Date(hour.time).toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+
+            <p className="text-xl mt-1">
+              {getWeatherEmoji(hour.weather_condition)}
+            </p>
+
+            <p className="text-sm font-bold text-blue-700 mt-1">
+              {Math.round(hour.temperature)}°C
+            </p>
+
+            <p className="text-[11px] text-slate-400">
+              Hujan {hour.rain_probability ?? 0}%
+            </p>
+          </div>
+        ))}
     </div>
   </div>
 )}

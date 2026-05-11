@@ -291,7 +291,7 @@ export default function WeatherPage() {
 
           return itemHour >= nextHour
         })
-        .slice(0, 12)
+        .slice(0, 8)
         .map((item, index) => (
           <div
             key={index}
