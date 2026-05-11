@@ -272,38 +272,46 @@ export default function WeatherPage() {
             </div>
           </div>
 
-          {weather?.hourly && (
-            <div className="bg-white border border-slate-100 rounded-2xl p-5">
-              <h3 className="text-lg font-bold text-slate-700 mb-5">
-                Prediksi Beberapa Jam Kedepan
-              </h3>
+         {weather?.hourly && (
+  <div className="bg-white border border-slate-100 rounded-2xl p-5">
+    <h3 className="text-lg font-bold text-slate-700 mb-5">
+      Prediksi Beberapa Jam Kedepan
+    </h3>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {weather.hourly.slice(0, 8).map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-blue-50 rounded-2xl p-4 text-center"
-                  >
-                    <p className="text-sm text-slate-500">
-                      {item.time.slice(11, 16)}
-                    </p>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {weather.hourly
+        .filter((item) => {
+          const now = new Date()
+          const itemTime = new Date(item.time)
 
-                    <p className="text-3xl mt-2">
-                      {conditionEmoji(item.weather_condition)}
-                    </p>
+          return itemTime >= now
+        })
+        .slice(0, 8)
+        .map((item, index) => (
+          <div
+            key={index}
+            className="bg-blue-50 rounded-2xl p-4 text-center"
+          >
+            <p className="text-sm text-slate-500">
+              {item.time.slice(11, 16)}
+            </p>
 
-                    <p className="text-xl font-bold text-blue-700 mt-2">
-                      {item.temperature}°C
-                    </p>
+            <p className="text-3xl mt-2">
+              {conditionEmoji(item.weather_condition)}
+            </p>
 
-                    <p className="text-xs text-slate-500 mt-1">
-                      Hujan {item.rain_probability}%
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            <p className="text-xl font-bold text-blue-700 mt-2">
+              {item.temperature}°C
+            </p>
+
+            <p className="text-xs text-slate-500 mt-1">
+              Hujan {item.rain_probability}%
+            </p>
+          </div>
+        ))}
+    </div>
+  </div>
+)}
 
           <WeatherCompareCard
             weather={weather as any}
