@@ -6,6 +6,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+function makeLabel(hour: number, minute: number) {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}
+
 export async function GET() {
   const { data, error } = await supabase
     .from('watering_schedule')
@@ -29,15 +33,22 @@ export async function GET() {
 export async function POST(req: Request) {
   const body = await req.json()
 
+  const hour = Number(body.hour)
+  const minute = Number(body.minute)
+  const duration = Number(body.duration)
+  const enabled = Boolean(body.enabled)
+  const label = makeLabel(hour, minute)
+
   // UPDATE EXISTING
   if (body.id) {
     const { data, error } = await supabase
       .from('watering_schedule')
       .update({
-        hour: body.hour,
-        minute: body.minute,
-        duration: body.duration,
-        enabled: body.enabled,
+        label,
+        hour,
+        minute,
+        duration,
+        enabled,
       })
       .eq('id', body.id)
       .select()
@@ -60,11 +71,45 @@ export async function POST(req: Request) {
   const { data, error } = await supabase
     .from('watering_schedule')
     .insert({
-      hour: body.hour,
-      minute: body.minute,
-      duration: body.duration,
-      enabled: body.enabled,
+      label,
+      hour,
+      minute,
+      duration,
+      enabled,
     })
+    .select()
+    .single()
+
+  if (error) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    )
+  }
+
+  return NextResponse.json({
+    success: true,
+    data,
+  })
+}
+
+export async function PATCH(req: Request) {
+  const body = await req.json()
+
+  const id = body.id
+  const enabled = Boolean(body.enabled)
+
+  if (!id) {
+    return NextResponse.json(
+      { success: false, error: 'ID kosong' },
+      { status: 400 }
+    )
+  }
+
+  const { data, error } = await supabase
+    .from('watering_schedule')
+    .update({ enabled })
+    .eq('id', id)
     .select()
     .single()
 
@@ -83,7 +128,6 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url)
-
   const id = searchParams.get('id')
 
   if (!id) {
@@ -107,5 +151,6 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({
     success: true,
+    message: 'Schedule deleted',
   })
 }
