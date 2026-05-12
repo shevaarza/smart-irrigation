@@ -127,8 +127,9 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const id = searchParams.get('id')
+  const body = await req.json()
+
+  const id = body.id
 
   if (!id) {
     return NextResponse.json(
@@ -151,6 +152,6 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({
     success: true,
-    message: 'Schedule deleted',
+    message: 'Jadwal berhasil dihapus',
   })
 }
