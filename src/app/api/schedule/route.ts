@@ -14,95 +14,81 @@ export async function GET() {
     .order('minute', { ascending: true })
 
   if (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    )
   }
 
-  return NextResponse.json({ success: true, data })
+  return NextResponse.json({
+    success: true,
+    data,
+  })
 }
 
 export async function POST(req: Request) {
   const body = await req.json()
 
-  const hour = Number(body.hour)
-  const minute = Number(body.minute)
-  const duration = Number(body.duration)
-  const enabled = body.enabled ?? true
+  // UPDATE EXISTING
+  if (body.id) {
+    const { data, error } = await supabase
+      .from('watering_schedule')
+      .update({
+        hour: body.hour,
+        minute: body.minute,
+        duration: body.duration,
+        enabled: body.enabled,
+      })
+      .eq('id', body.id)
+      .select()
+      .single()
 
-  if (
-    Number.isNaN(hour) ||
-    Number.isNaN(minute) ||
-    Number.isNaN(duration) ||
-    hour < 0 ||
-    hour > 23 ||
-    minute < 0 ||
-    minute > 59 ||
-    duration <= 0
-  ) {
-    return NextResponse.json(
-      { success: false, error: 'Input jadwal tidak valid' },
-      { status: 400 }
-    )
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data,
+    })
   }
 
-  const label =
-    body.label ||
-    `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
-
+  // INSERT NEW
   const { data, error } = await supabase
     .from('watering_schedule')
     .insert({
-      label,
-      hour,
-      minute,
-      duration,
-      enabled,
+      hour: body.hour,
+      minute: body.minute,
+      duration: body.duration,
+      enabled: body.enabled,
     })
     .select()
     .single()
 
   if (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true, data })
-}
-
-export async function PATCH(req: Request) {
-  const body = await req.json()
-
-  const id = Number(body.id)
-
-  if (!id) {
     return NextResponse.json(
-      { success: false, error: 'ID jadwal tidak valid' },
-      { status: 400 }
+      { success: false, error: error.message },
+      { status: 500 }
     )
   }
 
-  const { data, error } = await supabase
-    .from('watering_schedule')
-    .update({
-      enabled: body.enabled,
-    })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true, data })
+  return NextResponse.json({
+    success: true,
+    data,
+  })
 }
 
 export async function DELETE(req: Request) {
-  const body = await req.json()
+  const { searchParams } = new URL(req.url)
 
-  const id = Number(body.id)
+  const id = searchParams.get('id')
 
   if (!id) {
     return NextResponse.json(
-      { success: false, error: 'ID jadwal tidak valid' },
+      { success: false, error: 'ID kosong' },
       { status: 400 }
     )
   }
@@ -113,8 +99,13 @@ export async function DELETE(req: Request) {
     .eq('id', id)
 
   if (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    )
   }
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({
+    success: true,
+  })
 }
